@@ -1,0 +1,2140 @@
+EARMIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, NOTIFICATION-TYPE, Integer32, IpAddress, Unsigned32
+        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, DisplayString, RowStatus
+    	FROM SNMPv2-TC
+    ipgProducts, ipgModules
+   		FROM IPGPHOTONICS-GLOBAL-REG;
+        
+
+ipgEarMibModule MODULE-IDENTITY
+     LAST-UPDATED "200702191811Z"
+     ORGANIZATION "IPG Photonics"
+     CONTACT-INFO 
+        "Telecom Engineering
+         
+         Postal: 50 Old Webster Rd
+                 Oxford, MA 01540
+                 US
+                 
+         Tel:    508-373-1100             
+
+         WEB:    www.ipgphotonics.com"
+     DESCRIPTION  "EAR EDFA MIB module"
+     REVISION     "200702191811Z"
+     DESCRIPTION  "Rev. 1.6"
+     ::= { ipgModules 2 }
+
+
+-- root for items in the EDFA MIB Module
+ipgEdfaMIB  OBJECT IDENTIFIER ::= {ipgProducts 1}                                                      
+
+ipgEdfaSys     		OBJECT IDENTIFIER ::={ipgEdfaMIB 1} 
+ipgEdfaAttr     	OBJECT IDENTIFIER ::={ipgEdfaMIB 2} 
+ipgEdfaAlarmSettings  	OBJECT IDENTIFIER ::={ipgEdfaMIB 3}  
+ipgEdfaAlarmRaised	OBJECT IDENTIFIER ::={ipgEdfaMIB 4}      
+ipgEdfaAlarmCleared	OBJECT IDENTIFIER ::={ipgEdfaMIB 5}      
+ipgEdfaEventRaised	OBJECT IDENTIFIER ::={ipgEdfaMIB 6} 
+ipgEdfaHistory		OBJECT IDENTIFIER ::={ipgEdfaMIB 7} 
+
+
+-- textual conventions
+TenthdB ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"This unit is used to represent expressions that are 
+		 normally expressed in Decibels (dB).  For example, 
+		  10.1 dB is represented as 101 dB."
+	SYNTAX		Integer32(-100..400)	
+	
+TenthdBm ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"This unit is used to represent expressions that are 
+		 normally expressed in decibels (dBm).  The m refers to 
+		 the milliWatt reference level used.  For example, 10.1 dBm is represented 
+		 as 101 dBm."
+	SYNTAX		Integer32(-100..400)	 
+
+MilliWatts ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"This unit is used to represent expressions that are 
+		 normally expressed in milliwatts (mW)."
+	SYNTAX		Integer32(0..10)	 
+
+EarAlarmTimestamp ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Time that alarm occurred"
+	SYNTAX OCTET STRING (SIZE (50))
+
+EarEventTimestamp ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Time that event occurred"
+	SYNTAX OCTET STRING (SIZE (50))
+
+EarHistoryTimestamp ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Time that the historical event occurred"
+	SYNTAX OCTET STRING (SIZE (50))
+
+EarEnabled  ::= TEXTUAL-CONVENTION
+        STATUS      current
+        DESCRIPTION 
+                "Indicates disabled(0) or enabled(1)"
+        SYNTAX INTEGER{
+                disabled (0),
+                enabled (1)
+        }
+
+EarEventLevel ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Event severity:  major(1) minor(2) none(3)"
+	SYNTAX INTEGER{
+		major	(1),
+		minor	(2),
+		none	(3)
+	}
+	
+EarAlarmIndex ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Index of a row in the alarm status table."
+	SYNTAX Integer32(1..13)
+	
+EarSnmpMngrIndex ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Index of a row in the SNMP managers table."
+	SYNTAX Integer32(1..6)
+	
+EarEventIndex ::= TEXTUAL-CONVENTION
+	STATUS		current
+	DESCRIPTION        
+		"Index of a row in the event status table."
+	SYNTAX Integer32(1..100)
+
+EarDeviceType ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION
+            "Device type legacy(1), master(2), current(3)"
+        SYNTAX INTEGER{
+                legacy          (1),
+                master          (2),
+                slave           (3)
+        }
+	
+EarDataMode ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION
+            "ALS on/off or Nominal"
+        SYNTAX INTEGER{
+                off             (1),
+                als             (2),
+                nominal         (3)
+        }
+
+EarControlMode ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION
+            "Control algorithm:  power(1)/current(2)/gain(3)"
+        SYNTAX INTEGER {
+                power           (1),
+                current         (2),
+                gain            (3)
+        }
+
+EarDigiSelectedFirmwareBank ::= TEXTUAL-CONVENTION
+        STATUS          current 
+	DESCRIPTION
+            "Firmware bank selected:  flashbank1(1) flashbank2(2)"
+        SYNTAX INTEGER {
+                flashbank1      (1),
+                flashbank2      (2)
+        }
+
+EarDigiFirmwareConfirm ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION
+            "Firmware bank confirmed:  confirmed(1) unconfirmed(2)"
+        SYNTAX INTEGER {
+                confirmed       (1),
+                unconfirmed     (2)
+        }
+
+EarRelayStatus ::= TEXTUAL-CONVENTION
+        STATUS          current
+        DESCRIPTION
+            "relay tripped   normal(1) tripped(2)"
+        SYNTAX INTEGER {
+                normal          (1),
+                tripped         (2)
+        }
+
+-- scalar items for ipgEdfaSys
+	
+
+earModelNumber OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Model number"
+	::={ipgEdfaSys 1}
+	
+earSerialNumber OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Serial number"
+	::={ipgEdfaSys 2}
+
+earDateOfManufacture OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Date of manufacture"
+	::={ipgEdfaSys 3}
+
+earFirmwareRevision OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Firmware revision level"
+	::={ipgEdfaSys 4}
+
+earControlMode OBJECT-TYPE
+	SYNTAX EarControlMode
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Set the control mode type"
+	::={ipgEdfaSys 5} 	
+
+earRtcTime OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Real-time controller date and time MM/dd/yyyy HH:mm:ss:SS"
+	::={ipgEdfaSys 6}
+	
+earDigiFirmwareRevision OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Digi firmware revision level"
+	::={ipgEdfaSys 7}
+
+earDigiBank1FirmwareRevision OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Digi bank 1 firmware revision level"
+	::={ipgEdfaSys 8}
+
+earDigiBank2FirmwareRevision OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Digi bank 2 firmware revision level"
+	::={ipgEdfaSys 9}
+
+earDigiSelectedFirmwareBank OBJECT-TYPE
+	SYNTAX EarDigiSelectedFirmwareBank
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Digi selected firmware flash bank"
+	::={ipgEdfaSys 10} 	
+
+earDigiFirmwareConfirm OBJECT-TYPE
+	SYNTAX EarDigiFirmwareConfirm
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Confirmation status of active bank"
+	::={ipgEdfaSys 11} 	
+
+earUpgradeDigiFirmware OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Upgrade Digi inactive flash bank with specified file"
+	::={ipgEdfaSys 12}
+
+earCleiCode OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"CLEI Code"
+	::={ipgEdfaSys 13}
+
+earTelnetTimeout OBJECT-TYPE
+	SYNTAX Integer32(30..3600)
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Telnet timeout in seconds"
+	::={ipgEdfaSys 14}
+
+earIpAddress OBJECT-TYPE
+	SYNTAX IpAddress      
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Chassis IP address"
+	::={ipgEdfaSys 15}
+
+earSubnetMask OBJECT-TYPE
+	SYNTAX IpAddress      
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Chassis subnet mask"
+	::={ipgEdfaSys 16}
+
+earGateway OBJECT-TYPE
+	SYNTAX IpAddress      
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Chassis default gateway"
+	::={ipgEdfaSys 17}
+	
+earVendorProductNameAndSerialNumber OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Vendors product name and serial number"
+	::={ipgEdfaSys 18}
+
+ earLastTrapSent OBJECT-TYPE
+ 	SYNTAX		Unsigned32
+ 	MAX-ACCESS	read-only
+ 	STATUS      	current
+ 	DESCRIPTION
+                         "The earHistoryIndex of the last trap sent by the IPG EDFA device."
+ 	::={ipgEdfaSys 19}                                   
+
+earTrapPort OBJECT-TYPE
+	SYNTAX Integer32(1..65534)
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"SNMP Trap Port"
+	::={ipgEdfaSys 20}
+
+-- the SNMP Management Station address table
+
+ earSnmpMngrTable OBJECT-TYPE
+     SYNTAX      SEQUENCE OF EarSnmpMngrEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+             "The table of SNMP network managers."
+     ::= { ipgEdfaSys 21 }
+
+ earSnmpMngrEntry OBJECT-TYPE
+     SYNTAX      EarSnmpMngrEntry
+     MAX-ACCESS  not-accessible
+     STATUS      current
+     DESCRIPTION
+             "The information for one SNMP network manager."
+     INDEX      { earSnmpMngrIndex }
+     ::= { earSnmpMngrTable 1 }
+
+ EarSnmpMngrEntry ::= SEQUENCE {
+         earSnmpMngrIndex     EarSnmpMngrIndex,
+         earSnmpMngrIpAddr    IpAddress,
+         earSnmpMngrRowStatus RowStatus
+     }
+
+ earSnmpMngrIndex OBJECT-TYPE
+ 	SYNTAX EarSnmpMngrIndex
+ 	MAX-ACCESS	read-only
+ 	STATUS		current
+ 	DESCRIPTION	"Row index for SNMP manger table"
+ 	::={earSnmpMngrEntry 1}			
+
+ earSnmpMngrIpAddr OBJECT-TYPE
+     SYNTAX      IpAddress
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+             "The IP address to which this entry's addressing information
+             pertains."
+     ::= { earSnmpMngrEntry 2 }
+
+ earSnmpMngrRowStatus OBJECT-TYPE
+     SYNTAX      RowStatus
+     MAX-ACCESS  read-write
+     STATUS      current
+     DESCRIPTION
+             "The status of this conceptual row."
+     ::= { earSnmpMngrEntry 3 }
+
+-- system attributes
+
+earGainControlSetpoint OBJECT-TYPE
+	SYNTAX TenthdB      
+	UNITS "dB"		
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Gain setpoint value"
+	::={ipgEdfaAttr 1}
+
+earMeasuredGainValue OBJECT-TYPE
+	SYNTAX TenthdB	
+	UNITS "dB"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The current Gain value"
+	::={ipgEdfaAttr 2}
+
+earMinimumGainSetpoint OBJECT-TYPE
+	SYNTAX TenthdB	
+	UNITS "dB"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The minimum gain that can be set in AGC mode"
+	::={ipgEdfaAttr 3}
+
+earMaximumGainSetpoint OBJECT-TYPE
+	SYNTAX	TenthdB	
+	UNITS "dB"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The maximum gain that can be set in AGC mode"
+	::={ipgEdfaAttr 4}
+                      
+                      
+earOutputPowerSetpointValue OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Output power setpoint value"
+	::={ipgEdfaAttr 5}
+
+earTotalOpticalOutputPower OBJECT-TYPE
+	SYNTAX		TenthdBm   
+	UNITS "dBm"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The total optical output power"
+	::={ipgEdfaAttr 6}
+
+earMaximumPowerSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Maximum power setpoint"
+	::={ipgEdfaAttr 7}
+
+
+earCurrentSetpointValue OBJECT-TYPE
+	SYNTAX		Integer32
+	UNITS "mA"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Current setpoint value"
+	::={ipgEdfaAttr 8}
+
+earMaximumCurrentSetpoint OBJECT-TYPE
+	SYNTAX		Integer32
+	UNITS "mA"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Maximum current setpoint"
+	::={ipgEdfaAttr 9}
+
+earPumpLaserCurrent OBJECT-TYPE
+	SYNTAX		Integer32
+	UNITS "mA"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Pump laser current"
+	::={ipgEdfaAttr 10}
+
+earAmbientTemperature OBJECT-TYPE
+	SYNTAX		Integer32
+	UNITS "deg C"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The ambient temperature"
+	::={ipgEdfaAttr 11}
+
+earTotalOpticalInputPower OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The total optical Input power"
+	::={ipgEdfaAttr 12} 
+
+earPowerSafetyMode OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Output power is reduced to 15 dBm."
+	::={ipgEdfaAttr 13} 
+
+earPumpsOff OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Output power is reduced to 0 mW."
+	::={ipgEdfaAttr 14} 
+
+earChassisReboot OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS "dBm"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Reset the processor running the chassis."
+	::={ipgEdfaAttr 15} 
+
+earOutputPowerALSonFDSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default Laser 1 power setpoint for ALS on mode."
+	::={ipgEdfaAttr 16}
+
+earOutputPower2ALSonFDSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default Laser 2 power setpoint for ALS on mode."
+	::={ipgEdfaAttr 17}
+
+earOutputPowerALSoffFDSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default Laser 1 power setpoint for ALS off mode."
+	::={ipgEdfaAttr 18}
+
+earOutputPower2ALSoffFDSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default Laser 2 power setpoint for ALS off mode."
+	::={ipgEdfaAttr 19}
+
+earOutputPowerALSonSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Laser 1 power setpoint for ALS on mode."
+	::={ipgEdfaAttr 20}
+
+earOutputPower2ALSonSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Laser 2 power setpoint for ALS on mode."
+	::={ipgEdfaAttr 21}
+
+earOutputPowerALSoffSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Laser 1 power setpoint for ALS off mode."
+	::={ipgEdfaAttr 22}
+
+earOutputPower2ALSoffSetpoint OBJECT-TYPE
+	SYNTAX		TenthdBm
+	UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Laser 2 power setpoint for ALS off mode."
+	::={ipgEdfaAttr 23}
+
+earControlModeFD OBJECT-TYPE
+	SYNTAX		EarControlMode
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default Control Mode"
+	::={ipgEdfaAttr 24}
+
+earDeviceType OBJECT-TYPE
+	SYNTAX          EarDeviceType
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Device type legacy(1), master(2), slave(3)"
+	::={ipgEdfaAttr 25}
+
+earDeviceTypeFD OBJECT-TYPE
+	SYNTAX          EarDeviceType
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default device type legacy(1), master(2), slave(3)"
+	::={ipgEdfaAttr 26}
+
+earALSonDuration OBJECT-TYPE
+	SYNTAX          Unsigned32
+        UNITS           "mS"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default duration in milli-seconds for ALS on"
+	::={ipgEdfaAttr 27}
+
+earALSoffDuration OBJECT-TYPE
+	SYNTAX          Unsigned32
+        UNITS           "mS"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default duration in milli-seconds for ALS off"
+	::={ipgEdfaAttr 28}
+
+earNominalDuration OBJECT-TYPE
+	SYNTAX          Unsigned32
+        UNITS           "mS"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Default duration in milli-seconds for Nominal (s/b non-zero)"
+	::={ipgEdfaAttr 29}
+
+earDataMode OBJECT-TYPE
+	SYNTAX          EarDataMode
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Whether payload data is flowing off(no) ALS(no) Nominal(yes)"
+	::={ipgEdfaAttr 30}
+
+earOSCPowerSetpointValue OBJECT-TYPE
+	SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-write
+	STATUS		current
+	DESCRIPTION
+		"Pusk power setpoint in dBm"
+	::={ipgEdfaAttr 31}
+
+earOutputPower2SetpointValue OBJECT-TYPE
+	SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-write
+	STATUS		current
+	DESCRIPTION
+		"Laser 2 output power setpoint value"
+	::={ipgEdfaAttr 32}
+
+earTotalOpticalOutputPower2 OBJECT-TYPE
+	SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Laser 2 total optical output power"
+	::={ipgEdfaAttr 33}
+
+
+earGainControlSetpoint2 OBJECT-TYPE
+	SYNTAX          TenthdB      
+	UNITS           "dB"		
+	MAX-ACCESS      read-write
+	STATUS		current
+	DESCRIPTION
+		"Laser 2 gain setpoint value"
+	::={ipgEdfaAttr 34}
+
+earOSCOpticalPower OBJECT-TYPE
+	SYNTAX          TenthdBm
+	UNITS           "dBm"		
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"Pusk measured output power"
+	::={ipgEdfaAttr 35}
+
+earAliveTrapPeriod OBJECT-TYPE
+	SYNTAX          INTEGER
+	MAX-ACCESS      read-write
+	STATUS		current
+	DESCRIPTION
+		"I am alive notification period that controls the duration of
+         the trap.  15 minutes is the default value.  Value of zero 
+         turns off the notification.  Other values allowed are 3-20 
+         minutes. "
+	::={ipgEdfaAttr 36}
+
+
+-- Alarm Settings
+earTemperatureAlarmThreshold OBJECT-TYPE
+	SYNTAX		Integer32
+	UNITS "deg C"
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"The current minor alarm threshold value"
+	::={ipgEdfaAlarmSettings 1}
+
+earInputPowerLowAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"The INPUT POWER LOW alarm level.  Overrides factory
+		 default setting"
+	::={ipgEdfaAlarmSettings 2} 
+	
+earFactoryDefaultInputPowerLowAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"Reads the factory default setting for the INPUT POWER LOW 
+		 alarm level"
+	::={ipgEdfaAlarmSettings 3}	
+
+earInputPowerOffAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The INPUT POWER OFF alarm level"
+	::={ipgEdfaAlarmSettings 4}
+
+earInputPowerHighAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The INPUT POWER HIGH alarm level"
+	::={ipgEdfaAlarmSettings 5}
+
+earInputPowerTooHighAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The INPUT POWER TOO HIGH alarm level"
+	::={ipgEdfaAlarmSettings 6}
+
+earOutputPowerLowAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the OUTPUT POWER LOW alarm"
+	::={ipgEdfaAlarmSettings 7}
+
+earOutputPowerOffAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the OUTPUT POWER OFF alarm"
+	::={ipgEdfaAlarmSettings 8}
+	
+earOutputPowerHighAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The OUTPUT POWER HIGH alarm level"
+	::={ipgEdfaAlarmSettings 9}
+
+earOutputPowerTooHighAlarmLevel OBJECT-TYPE
+	SYNTAX		TenthdBm
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The OUTPUT POWER TOO HIGH alarm level"
+	::={ipgEdfaAlarmSettings 10}
+
+earStatusValue OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The status of the unit encoded as a 32 bit integer"
+	::={ipgEdfaAlarmSettings 11}
+	
+earRelayAlarmStatus OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The alarms that are assigned to trip the alarm relay.  
+		 This is an encoded word"
+	::={ipgEdfaAlarmSettings 12}                                
+
+earRelayStatus OBJECT-TYPE
+	SYNTAX EarRelayStatus
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The state of the relay, NORMAL or TRIPPED"
+	::={ipgEdfaAlarmSettings 13}
+
+earAlarmStatus OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS  read-only
+	STATUS		current
+	DESCRIPTION
+		"The individual alarm conditions within the laser.  This is
+		 an encoded word"
+	::={ipgEdfaAlarmSettings 14} 
+
+earSetRelayInputPowerLowAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 15} 
+
+earSetRelayInputPowerHighAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 16}
+	
+earSetRelayInputPowerTooHighAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 17}
+	
+earSetRelayOutputPowerLowAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 18}
+	
+earSetRelayOutputPowerHighAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 19}
+	
+earSetRelayOutputPowerTooHighAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 20}
+	
+earSetRelayFanFailureAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 21}	
+
+earSetRelayAmbientTemperatureHighAlarm OBJECT-TYPE
+        SYNTAX EarEnabled
+	MAX-ACCESS  read-write
+	STATUS		current
+	DESCRIPTION
+		"Enables or disables activation of the relay for the alarm"
+	::={ipgEdfaAlarmSettings 22}                                   
+
+earOutputPower2OffAlarmLevel OBJECT-TYPE
+        SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the 2nd laser OUTPUT POWER OFF alarm"
+	::={ipgEdfaAlarmSettings 23}                                   
+
+earOutputPower2LowAlarmLevel OBJECT-TYPE
+        SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the 2nd laser OUTPUT POWER LOW alarm"
+	::={ipgEdfaAlarmSettings 24}                                   
+
+earOutputPower2HighAlarmLevel OBJECT-TYPE
+        SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the 2nd laser OUTPUT POWER HIGH alarm"
+	::={ipgEdfaAlarmSettings 25}                                   
+
+earOutputPower2TooHighAlarmLevel OBJECT-TYPE
+        SYNTAX          TenthdBm
+        UNITS           "dBm"
+	MAX-ACCESS      read-only
+	STATUS		current
+	DESCRIPTION
+		"The threshold level for the 2nd laser OUTPUT POWER TOO HIGH alarm"
+	::={ipgEdfaAlarmSettings 26}                                   
+
+
+--------------------------------------------------------------------------------------------
+
+-- Table for description and alarm set actions
+earAlarmTable OBJECT-TYPE				-- earAlarmTable is the table identifier
+	SYNTAX 		SEQUENCE OF EarAlarmEntry	-- SEQUENCE of <sequence identifier>
+	MAX-ACCESS  not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Table for current alarm conditions present on the system"
+	::={ipgEdfaAlarmSettings 27}
+
+earAlarmEntry OBJECT-TYPE				-- earAlarmEntry is the row identifier
+	SYNTAX		EarAlarmEntry
+	MAX-ACCESS  not-accessible
+	STATUS		current
+	DESCRIPTION
+		"A row in the alarm table created when an alarm condition 
+		 occurs"
+	INDEX		{earAlarmIndex}
+	::={earAlarmTable 1}	
+	
+EarAlarmEntry ::= SEQUENCE{	
+	earAlarmIndex     EarAlarmIndex,
+	earAlarmType      INTEGER,
+	earAlarmTimeStamp EarAlarmTimestamp,
+	earAlarmSeverity  EarEventLevel
+	}
+	
+earAlarmIndex OBJECT-TYPE
+	SYNTAX 		EarAlarmIndex
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Row index for alarm status table"
+	::={earAlarmEntry 1}			
+
+earAlarmType OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+			alarmTemperatureFlag     (1),
+			alarmFanFlag             (2),
+			alarmOutputTooHighFlag   (3),
+			alarmOutputHighFlag      (4),
+			alarmOutputLowFlag       (5),
+			alarmInputTooHighFlag    (6),
+			alarmInputHighFlag       (7),
+			alarmInputLowFlag        (8),
+			alarmOutputOffFlag       (9),
+			alarmInputOffFlag       (10),
+			alarmInterlockFlag      (11),
+			alarmPs1FailFlag        (12),
+			alarmPs2FailFlag        (13),
+			alarmPowerSafetyFlag    (14),
+			alarmKeyswitchFlag	(15),
+                        alarmOutput2OffFlag     (16),
+                        alarmOutput2LowFlag     (17),
+                        alarmOutput2HighFlag    (18),
+                        alarmOutput2TooHighFlag (19),
+                        alarmPumpFlag           (20)
+	}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"One or more alarms have occurred in the system.  Signal the notification(s).
+		 Alarms include the following:
+
+			ALARM_TEMPERATURE_FLAG        (1)
+			ALARM_FAN_FLAG                (2)
+			ALARM_OUTPUT_TOO_HIGH_FLAG    (3)
+			ALARM_OUTPUT_HIGH_FLAG        (4)
+			ALARM_OUTPUT_LOW_FLAG         (5)
+			ALARM_INPUT_TOO_HIGH_FLAG     (6)
+			ALARM_INPUT_HIGH_FLAG         (7)
+			ALARM_INPUT_LOW_FLAG          (8)
+			ALARM_OUTPUT_OFF_FLAG         (9)
+			ALARM_INPUT_OFF_FLAG         (10)
+			ALARM_INTERLOCK_FLAG         (11)
+			ALARM_PS1_FAIL_FLAG          (12)
+			ALARM_PS2_FAIL_FLAG          (13)
+			ALARM_POWER_SAFETY_FLAG      (14)
+			ALARM_KEYSWITCH_FLAG         (15)
+			ALARM_OUTPUT_2_OFF_FLAG      (16)
+			ALARM_OUTPUT_2_LOW_FLAG      (17)
+			ALARM_OUTPUT_2_HIGH_FLAG     (18)
+			ALARM_OUTPUT_2_TOO_HIGH_FLAG (19)
+			ALARM_PUMP_FLAG              (20)"
+	::={earAlarmEntry 2}			
+
+earAlarmTimeStamp OBJECT-TYPE
+	SYNTAX		EarAlarmTimestamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"The time the alarm was triggered"
+	::={earAlarmEntry 3}			
+
+earAlarmSeverity OBJECT-TYPE
+	SYNTAX EarEventLevel
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"Severity of the triggered alarm"
+	::={earAlarmEntry 4}
+
+
+-------------------------------------------------------------------------------
+
+
+earEdfaAlarmTemperature NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Ambient temperature too high "
+	::={ipgEdfaAlarmRaised 1}                                   
+
+earEdfaAlarmFan NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Fan failure "
+	::={ipgEdfaAlarmRaised 2}                                   
+
+earEdfaAlarmOutputTooHigh NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 10% above defined upper limit threshold "
+	::={ipgEdfaAlarmRaised 3}                                   
+
+earEdfaAlarmOutputHigh NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 5% above defined upper limit threshold "
+	::={ipgEdfaAlarmRaised 4}                                   
+
+earEdfaAlarmOutputLow NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 10% below defined lower limit threshold "
+	::={ipgEdfaAlarmRaised 5}                                   
+
+earEdfaAlarmInputTooHigh NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 10% above defined upper limit threshold "
+	::={ipgEdfaAlarmRaised 6}                                   
+
+earEdfaAlarmInputHigh NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 5% above defined upper limit threshold "
+	::={ipgEdfaAlarmRaised 7}                                   
+
+earEdfaAlarmInputLow NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 10% below defined lower limit threshold "
+	::={ipgEdfaAlarmRaised 8}                                   
+
+earEdfaAlarmOutputOff NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power is off "
+	::={ipgEdfaAlarmRaised 9}                                   
+
+earEdfaAlarmInputOff NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power is off "
+	::={ipgEdfaAlarmRaised 10}                                   
+
+earEdfaAlarmInterlock NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Laser interlock failure "
+	::={ipgEdfaAlarmRaised 11}                                   
+
+earEdfaAlarmPowerSupply1 NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power supply 1 failure "
+	::={ipgEdfaAlarmRaised 12}                                   
+
+earEdfaAlarmPowerSupply2 NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power supply 2 failure "
+	::={ipgEdfaAlarmRaised 13}                                   
+
+earEdfaAlarmPowerSafetyMode NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power safety mode has been engaged"
+	::={ipgEdfaAlarmRaised 14}                                   
+
+earEdfaAlarmKeyswitch NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmRaised 15}                                   
+
+earEdfaAlarmOutput2Off NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power 2 is off"
+	::={ipgEdfaAlarmRaised 16}                                   
+
+earEdfaAlarmOutput2Low NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power 2 is low"
+	::={ipgEdfaAlarmRaised 17}                                   
+
+earEdfaAlarmOutput2High NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power 2 is high"
+	::={ipgEdfaAlarmRaised 18}                                   
+
+earEdfaAlarmOutput2TooHigh NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power 2 is too high"
+	::={ipgEdfaAlarmRaised 19}
+
+earEdfaAlarmPump NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Pump alarm"
+         ::={ipgEdfaAlarmRaised 20}
+
+------------------------------------------
+
+earEdfaAlarmTemperatureCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Ambient temperature too high "
+	::={ipgEdfaAlarmCleared 1}                                   
+
+earEdfaAlarmFanCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Fan failure "
+	::={ipgEdfaAlarmCleared 2}                                   
+
+earEdfaAlarmOutputTooHighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            } 
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 10% above defined upper limit threshold "
+	::={ipgEdfaAlarmCleared 3}                                   
+
+earEdfaAlarmOutputHighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 5% above defined upper limit threshold "
+	::={ipgEdfaAlarmCleared 4}                                   
+
+earEdfaAlarmOutputLowCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power > 10% below defined lower limit threshold "
+	::={ipgEdfaAlarmCleared 5}                                   
+
+earEdfaAlarmInputTooHighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 10% above defined upper limit threshold "
+	::={ipgEdfaAlarmCleared 6}                                   
+
+earEdfaAlarmInputHighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 5% above defined upper limit threshold "
+	::={ipgEdfaAlarmCleared 7}                                   
+
+earEdfaAlarmInputLowCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power > 10% below defined lower limit threshold "
+	::={ipgEdfaAlarmCleared 8}                                   
+
+earEdfaAlarmOutputOffCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power is off "
+	::={ipgEdfaAlarmCleared 9}                                   
+
+earEdfaAlarmInputOffCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power is off "
+	::={ipgEdfaAlarmCleared 10}                                   
+
+earEdfaAlarmInterlockCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Laser interlock failure "
+	::={ipgEdfaAlarmCleared 11}                                   
+
+earEdfaAlarmPowerSupply1Cleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power supply 1 failure "
+	::={ipgEdfaAlarmCleared 12}                                   
+
+earEdfaAlarmPowerSupply2Cleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power supply 2 failure "
+	::={ipgEdfaAlarmCleared 13}                                   
+
+earEdfaAlarmPowerSafetyModeCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power safety mode has been disengaged"
+	::={ipgEdfaAlarmCleared 14}                                   
+
+earEdfaAlarmKeyswitchCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 15}                                   
+
+earEdfaAlarmOutput2OffCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 16}                                   
+
+earEdfaAlarmOutput2LowCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 17}                                   
+
+earEdfaAlarmOutput2HighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 18}                                   
+
+earEdfaAlarmOutput2TooHighCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 19}                                   
+
+earEdfaAlarmPumpCleared NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis key has been switched"
+	::={ipgEdfaAlarmCleared 20}                                   
+
+-------------------------------------------------------------------------------
+
+earControlModeEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Power supply 2 failure "
+	::={ipgEdfaEventRaised 1}                                   
+
+earRtcEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Real Time Clock time setting has been changed."
+	::={ipgEdfaEventRaised 2}                                   
+
+earSelectedFirmwareBankEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Selected firmware bank has been changed."
+	::={ipgEdfaEventRaised 3}                                   
+
+earDigiFirmwareConfirmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Firmware confirmation event has occurred."
+	::={ipgEdfaEventRaised 4}                                   
+
+earUpgradeDigiFirmwareEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Firmware has been upgraded in an application image area flash bank."
+	::={ipgEdfaEventRaised 5}                                   
+
+earTelnetTimeoutEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Telnet timeout value has been modified."
+	::={ipgEdfaEventRaised 6}                                   
+
+earIPAddressEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis IP address value has been modified."
+	::={ipgEdfaEventRaised 7}                                   
+
+earSubnetMaskEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis IP subnet mask address has been modified."
+	::={ipgEdfaEventRaised 8}                                   
+
+earGatewayEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Chassis IP gateway address value has been modified."
+	::={ipgEdfaEventRaised 9}                                   
+
+earGainControlSetpointEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Gain control setpoint value has been modified."
+	::={ipgEdfaEventRaised 10}                                   
+
+earOutputPowerSetpointEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power setpoint value has been modified."
+	::={ipgEdfaEventRaised 11}                                   
+
+earCurrentSetpointValueEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Current setpoint value has been modified."
+	::={ipgEdfaEventRaised 12}                                   
+
+earInputPowerLowAlarmLevelEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power low alarm level has been modified."
+	::={ipgEdfaEventRaised 13}                                   
+
+earRelayInputPowerLowAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power low alarm relay value has been modified."
+	::={ipgEdfaEventRaised 14}                                   
+
+earRelayInputPowerHighAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power high alarm relay value has been modified."
+	::={ipgEdfaEventRaised 15}                                   
+
+earRelayInputPowerTooHighAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Input power too high alarm relay value has been modified."
+	::={ipgEdfaEventRaised 16}                                   
+
+earRelayOutputPowerLowAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power low alarm relay value has been modified."
+	::={ipgEdfaEventRaised 17}                                   
+
+earRelayOutputPowerHighAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power high alarm relay value has been modified."
+	::={ipgEdfaEventRaised 18}                                   
+
+earRelayOutputPowerTooHighAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power too high alarm relay value has been modified."
+	::={ipgEdfaEventRaised 19}                                   
+
+earRelayFanFailureAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Fan failure alarm relay value has been modified."
+	::={ipgEdfaEventRaised 20}                                   
+
+earRelayAmbientTemperatureAlarmEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Ambient temperature alarm relay value has been modified."
+	::={ipgEdfaEventRaised 21}                                   
+
+earPowerSafetyModeEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power value has been modified to the safety setting."
+	::={ipgEdfaEventRaised 22}                                   
+
+earPumpsOffEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Output power value has been modified to turn the pumps off."
+	::={ipgEdfaEventRaised 23}                                   
+
+earChassisRebootEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "EDFA chassis processor device is being reset."
+	::={ipgEdfaEventRaised 24}                                   
+
+earMgmtStationAddEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "An SNMP management station has been added"
+	::={ipgEdfaEventRaised 25}                                   
+
+earMgmtStationRemoveEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "An SNMP management station has been removed"
+	::={ipgEdfaEventRaised 26}                                   
+
+earPrivateCommunityStrEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "An SNMP management station private community string value has been modified."
+	::={ipgEdfaEventRaised 27}                                   
+
+earPublicCommunityStrEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "An SNMP management station public community string value has been modified."
+	::={ipgEdfaEventRaised 28}                                   
+
+earTemperatureAlarmThresholdEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "Temperature alarm threshold is being reset."
+	::={ipgEdfaEventRaised 29}                                   
+
+
+earSnmpPortSetEvent NOTIFICATION-TYPE
+            OBJECTS {
+                        earHistoryIndex,
+			earHistoryType,
+                        earHistoryTimeStamp,
+                        earHistorySeverity
+            }
+            STATUS      current
+            DESCRIPTION
+                        "The SNMP trap port is being set."
+	::={ipgEdfaEventRaised 30}                                   
+
+-- Table for description and event set actions
+
+
+earEventTable OBJECT-TYPE	-- earEventTable is the table identifier
+	SYNTAX 		SEQUENCE OF EarEventEntry
+	MAX-ACCESS  not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Table for current events present on the system"
+	::={ipgEdfaEventRaised 31}
+
+earEventEntry OBJECT-TYPE				-- earEventEntry is the row identifier
+	SYNTAX		EarEventEntry
+	MAX-ACCESS  not-accessible
+	STATUS		current
+	DESCRIPTION
+		"A row in the event table created when an event condition 
+		 occurs"
+	INDEX		{earEventIndex}
+	::={earEventTable 1}	
+
+EarEventEntry ::= SEQUENCE{	
+	earEventIndex     EarEventIndex,
+	earEventType      INTEGER,
+	earEventTimeStamp EarEventTimestamp,
+	earEventSeverity  EarEventLevel
+	}
+
+	
+earEventIndex OBJECT-TYPE
+	SYNTAX 		EarEventIndex
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Row index for event status table"
+	::={earEventEntry 1}			
+
+earEventType OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+			controlModeModifiedEvent     		(1),
+			rTCModifiedEvent             		(2),
+			selectedFirmwareBankModifiedEvent   	(3),
+			firmwareConfirmationEvent      		(4),
+			firmwareUpgradeEvent       		(5),
+			telnetTimeoutEvent    			(6),
+			iPAddressEvent       			(7),
+			subnetMaskAddressEvent 		        (8),
+			gatewayAddressEvent    			(9),
+			gainControlSetpointEvent       		(10),
+			outputPowerSetpointEvent      		(11),
+			currentSetpointEvent        		(12),
+			inputPowerLowAlarmLevelEvent	        (13),
+			relayInputPowerLowAlarmEvent        	(14),
+			relayInputPowerHighAlarmEvent        	(15),
+			relayInputPowerTooHighAlarmEvent        (16),
+			relayOutputPowerLowAlarmEvent        	(17),
+			relayOutputPowerHighAlarmEvent        	(18),
+			relayOutputPowerTooHighAlarmEvent       (19),
+			relayFanFailureAlarmEvent        	(20),
+			relayAmibientTemperatureHighAlarmEvent  (21),
+			powerSafetyModeEvent			(22),
+			pumpsOffEvent				(23),
+			chassisRebootEvent			(24),
+			mgmtStationAddEvent 			(25),
+			mgmtStationRemoveEvent 			(26),
+			privateCommunityStrEvent 		(27),
+			publicCommunityStrEvent 		(28),
+			temperatureAlarmThresholdEvent 		(29),
+			snmpTrapPortSetEvent           		(30),
+                  snmp15MinAliveEvent                  (31)
+	}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"One or more alarms have occurred in the system.  Signal the notification(s).
+		 Events include the following:
+		 "
+	::={earEventEntry 2}			
+
+earEventTimeStamp OBJECT-TYPE
+	SYNTAX		EarEventTimestamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"The time the event was triggered"
+	::={earEventEntry 3}			
+
+earEventSeverity OBJECT-TYPE
+	SYNTAX		EarEventLevel
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"Severity of the triggered event
+		major	(1),
+		minor	(2),
+		none	(3)"
+	::={earEventEntry 4}
+
+-------------------------------------------------------------------------------
+
+-- earLastTrapSent OBJECT-TYPE
+-- 	SYNTAX		Unsigned32
+-- 	MAX-ACCESS	read-only
+-- 	STATUS      	current
+-- 	DESCRIPTION
+--                         "This value is the earHistoryIndex of the last trap sent by the IPG EDFA device."
+-- 	::={ipgEdfaHistory 1}                                   
+
+--------------------------------------------
+
+-- Table for description and event set actions
+earHistoryTable OBJECT-TYPE				-- earHistoryTable is the table identifier
+	SYNTAX 		SEQUENCE OF EarHistoryEntry	-- SEQUENCE of <sequence identifier>
+	MAX-ACCESS  	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"Table for history of events which have occurred on the system"
+	::={ipgEdfaHistory 1}
+
+earHistoryEntry OBJECT-TYPE				-- earHistoryEntry is the row identifier
+	SYNTAX		EarHistoryEntry
+	MAX-ACCESS  	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"A row in the history table created when an alarm or event condition 
+		 occurs"
+	INDEX		{earHistoryIndex}
+	::={earHistoryTable 1}	
+	
+EarHistoryEntry ::= SEQUENCE{	
+	earHistoryIndex     Unsigned32,
+	earHistoryType      INTEGER,
+	earHistoryTimeStamp EarHistoryTimestamp,
+	earHistorySeverity  EarEventLevel
+	}
+	
+earHistoryIndex OBJECT-TYPE
+	SYNTAX 		Unsigned32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	"Row index for the history table"
+	::={earHistoryEntry 1}			
+
+earHistoryType OBJECT-TYPE
+	SYNTAX INTEGER
+	{
+			alarmTemperatureFlagRaised			 (1),
+			alarmFanFlagRaised				 (2),
+			alarmOutputTooHighFlagRaised			 (3),
+			alarmOutputHighFlagRaised			 (4),
+			alarmOutputLowFlagRaised			 (5),
+			alarmInputTooHighFlagRaised			 (6),
+			alarmInputHighFlagRaised			 (7),
+			alarmInputLowFlagRaised				 (8),
+			alarmOutputOffFlagRaised			 (9),
+			alarmInputOffFlagRaised				(10),
+			alarmInterlockFlagRaised			(11),
+			alarmPs1FailFlagRaised				(12),
+			alarmPs2FailFlagRaised				(13),
+			alarmPowerSafetyModeRaised			(14),
+			alarmKeyswitchFlagRaised			(15),
+                        alarmOutput2OffFlagRaised                       (16),
+                        alarmOutput2LowFlagRaised                       (17),
+                        alarmOutput2HighFlagRaised                      (18),
+                        alarmOutput2TooHighFlagRaised                   (19),
+                        alarmPumpFlagRaised                             (20),
+
+			alarmTemperatureFlagClear			(21),
+			alarmFanFlagClear				(22),
+			alarmOutputTooHighFlagClear			(23),
+			alarmOutputHighFlagClear			(24),
+			alarmOutputLowFlagClear				(25),
+			alarmInputTooHighFlagClear			(26),
+			alarmInputHighFlagClear				(27),
+			alarmInputLowFlagClear				(28),
+			alarmOutputOffFlagClear				(29),
+			alarmInputOffFlagClear				(30),
+			alarmInterlockFlagClear				(31),
+			alarmPs1FailFlagClear				(32),
+			alarmPs2FailFlagClear				(33),
+			alarmPowerSafetyModeClear			(34),
+			alarmKeyswitchFlagCleared			(35),
+                        alarmOutput2OffFlagCleared                      (36),
+                        alarmOutput2LowFlagCleared                      (37),
+                        alarmOutput2HighFlagCleared                     (38),
+                        alarmOutput2TooHighFlagCleared                  (39),
+                        alarmPumpFlagCleared                            (40),
+
+-- remember, after sending a trap, we add MAX_ALARM_OFFSET and MAX_ALARM_RESET
+			controlModeModifiedEntry			(41),
+			rtcModifiedEntry				(42),
+			selectedFirmwareBankModifiedEntry		(43),
+			firmwareConfirmationEntry			(44),
+			firmwareUpgradeEntry				(45),
+			telnetTimeoutEntry				(46),
+			iPAddressEntry					(47),
+			subnetMaskAddressEntry				(48),
+			gatewayAddressEntry				(49),
+			gainControlSetpointEntry			(50),
+			outputPowerSetpointEntry			(51),
+			currentSetpointEntry				(52),
+			inputPowerLowAlarmLevelEntry			(53),
+			relayInputPowerLowAlarmEntry			(54),
+			relayInputPowerHighAlarmEntry			(55),
+			relayInputPowerTooHighAlarmEntry		(56),
+			relayOutputPowerLowAlarmEntry			(57),
+			relayOutputPowerHighAlarmEntry			(58),
+			relayOutputPowerTooHighAlarmEntry		(59),
+			relayFanFailureAlarmEntry			(60),
+			relayAmibientTemperatureHighAlarmEntry		(61),
+			powerSafetyModeEntry				(62),
+			pumpsOffEntry					(63),
+			chassisResetEntry				(64),
+			mgmtStationAddEntry 				(65),
+			mgmtStationRemoveEntry 				(66),
+			privateCommunityStrEntry 			(67),
+			publicCommunityStrEntry 			(68),
+			temperatureAlarmThresholdEntry 			(69),
+			snmpTrapPortEntry              			(70),
+                  snmp15MinAliveEntry                        (71) 
+	}
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"One or more historical events have occurred in the system.  Signal the notification(s).
+		 Historic events include the following:
+		 "
+
+	::={earHistoryEntry 2}			
+
+earHistoryTimeStamp OBJECT-TYPE
+	SYNTAX		EarHistoryTimestamp
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"The time the event was triggered"
+	::={earHistoryEntry 3}			
+
+earHistorySeverity OBJECT-TYPE
+	SYNTAX		EarEventLevel
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION	
+		"Severity of the triggered event
+		major	(1),
+		minor	(2),
+		none	(3)"
+	::={earHistoryEntry 4}
+
+	END

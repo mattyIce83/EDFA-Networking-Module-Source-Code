@@ -1,0 +1,15 @@
+-- Changes to rfc1904 - SNMPv2-CONF (Conformances):
+--      Converted to SMIC format.
+-- dperkins@scruznet.com
+
+SNMPv2-CONF DEFINITIONS ::= BEGIN
+
+-- macros
+
+SMI OBJECT-GROUP
+SMI NOTIFICATION-GROUP
+SMI MODULE-COMPLIANCE
+SMI AGENT-CAPABILITIES
+
+END
+

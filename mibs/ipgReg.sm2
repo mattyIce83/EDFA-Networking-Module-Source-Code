@@ -1,0 +1,48 @@
+IPGPHOTONICS-GLOBAL-REG DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-IDENTITY, enterprises FROM SNMPv2-SMI;
+
+ipgPhotonicsGlobalRegModule MODULE-IDENTITY
+     LAST-UPDATED "200605041645Z"
+     ORGANIZATION "IPG Photonics"
+     CONTACT-INFO 
+        "Telecom Engineering
+         
+         Postal: 50 Old Webster Rd
+                 Oxford, MA 01540
+                 US
+                 
+         Tel:	 508-373-1100             
+
+         WEB: 	 www.ipgphotonics.com"
+     DESCRIPTION  "EAR EDFA MIB module"
+     REVISION     "200605041645Z"
+     DESCRIPTION  "Rev. 1.3"
+     ::= { ipgModules 1 }
+
+
+-- IPG's enterprise number
+ipg			OBJECT IDENTIFIER ::= { enterprises 19775}
+
+ipgProducts		OBJECT IDENTIFIER ::= { ipg 1}
+ipgReg   		OBJECT IDENTIFIER ::= { ipg 2}
+
+ipgModules 	        OBJECT IDENTIFIER ::= { ipgReg 1}
+telecomProducts		OBJECT IDENTIFIER ::= { ipgReg 2}
+industrialProducts	OBJECT IDENTIFIER ::= { ipgReg 3}
+
+-- Products
+edfaProduct             OBJECT-IDENTITY 
+	STATUS		current
+	DESCRIPTION	"EDFA Multiport"
+	::= {ipgProducts 1}
+
+-- Real hardware registration
+earReg	         OBJECT-IDENTITY 
+	STATUS		current
+	DESCRIPTION	"EAR-100x10-C1-CWDM"
+	::= {telecomProducts 1}
+
+
+	END

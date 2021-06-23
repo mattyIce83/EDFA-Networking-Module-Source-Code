@@ -1,0 +1,2 @@
+smicng -z -cm example.inc > temp.out
+java -jar c:/NETOS60_GNU/bin/mibman.jar list.temp test/

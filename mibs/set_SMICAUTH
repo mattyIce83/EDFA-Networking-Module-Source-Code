@@ -1,0 +1,2 @@
+set SMICAUTH=OEM:digi.com,FEA:Z,LID:plapine@ipgphotonics.com,EXP:20060609,KEY:c0144c4999d108f8205fb28e54099007
+export SMICAUTH 

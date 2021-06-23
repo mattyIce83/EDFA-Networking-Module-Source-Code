@@ -1,0 +1,16 @@
+/.cvsignore////
+/depend.mk////
+/dump_ver////
+/gdbtkconnectme.raven////
+/image.bin////
+/image.elf////
+/image.map////
+/image.sym////
+/image.uncompressed////
+/makefile////
+/rom.bin////
+/rom.elf////
+/rom.map////
+/rom.sym////
+/version.bin////
+/verstmp.exe////
